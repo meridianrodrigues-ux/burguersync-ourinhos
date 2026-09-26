@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+package-lock.json
+
+# Ambiente e Chaves Sensíveis (Segurança)
+.env
+.env.local
+mcp-server.json
+
+# Arquivos Temporários e Logs do Antigravity
+.tmp/
+*.log
+
+# IDEs e Sistema Operacional
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
