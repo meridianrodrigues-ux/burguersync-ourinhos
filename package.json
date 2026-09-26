@@ -1,4 +1,8 @@
 {
+  "name": "burguersync-ourinhos",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "BurguerSync Ourinhos - Realtime Delivery & Kitchen Management System",
   "dependencies": {
     "firebase": "^12.19.0"
   }

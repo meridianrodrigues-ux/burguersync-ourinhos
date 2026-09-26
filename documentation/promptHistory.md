@@ -25,12 +25,14 @@
 
 ---
 
-### Status da Execução
-* **Layer 1 (Diretivas):** Especificações carregadas de `directives/projeto.md` e `directives/design/design.md`.
-* **Layer 2 (Orquestração):** Integração com `StitchMCP` realizada com sucesso, extraindo imagens e tokens de design Dark Mode Neon.
-* **Layer 3 (Execução):**
-  * Frontend modular ES6 gerado em `/frontend`.
-  * Firebase SDK v10 configurado com resiliência e fallback offline em LocalStorage.
-  * Scripts determinísticos criados em `/backend` (`seed.js`, `test-firestore.js`).
-  * Automação de CI/CD para GitHub Pages em `.github/workflows/deploy.yml`.
-  * Documentação bilíngue e executáveis (`README.md`, `instruction.md`, `executar.bat`).
+### Prompt 2 (Diagnóstico e Correção de Persistência no Firebase)
+```text
+/agente-orquestrador /grill-me /goal a aplicação está funcionando, porém não salvou no banco de dados no firebase. favor corrigir
+```
+
+* **Diagnóstico da Causa Raiz:**
+  A chamada ao Firebase SDK retorna `PERMISSION_DENIED: Missing or insufficient permissions`. As regras de segurança padrão do Firestore (`firestore.rules`) no projeto `burguersync-meridian` estão bloqueando leitura e escrita (`allow read, write: if false;`), ativando o fallback de resiliência local.
+* **Ações de Correção:**
+  1. Identificação da regra restritiva no Firebase Console.
+  2. Ajuste do tratamento e feedback visual no frontend caso o Firestore rejeite por permissão.
+  3. Instrução clara e objetiva para liberação das regras de teste no Firestore Database Rules.
