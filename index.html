@@ -55,6 +55,23 @@
          ====================================================================== -->
     <main id="visaoCliente" class="view-section">
         
+        <!-- Alerta Informativo e Auto-Sync de Permissão do Firebase Firestore -->
+        <div id="firestoreAlertBanner" class="firestore-alert-banner hidden">
+            <div class="firestore-alert-header">
+                <div class="firestore-alert-title">
+                    <span>⚠️</span> <span id="alertBannerTitle">Permissão de Gravação no Firestore Restrita</span>
+                </div>
+                <span id="pendingOrdersCount" class="badge-tag" style="position:static; background:var(--accent-yellow); color:#000;">0 pedidos em fila</span>
+            </div>
+            <p id="alertBannerDesc" class="firestore-alert-desc">
+                O Firebase Firestore bloqueou a gravação direta na nuvem (<strong>PERMISSION_DENIED</strong>). Seus pedidos estão salvos com segurança no cache local e serão sincronizados automaticamente assim que as regras forem liberadas no Firebase Console.
+            </p>
+            <div class="firestore-alert-actions">
+                <button type="button" id="btnCopiarRegraFirestore" class="btn-rule-copy">📋 Copiar Regra do Firestore</button>
+                <button type="button" id="btnTentarSincronizar" class="btn-retry-sync">🔄 Tentar Sincronizar Agora</button>
+            </div>
+        </div>
+        
         <!-- Hero Banner com Cidade de Ourinhos SP -->
         <section class="hero-banner">
             <div class="hero-content">
