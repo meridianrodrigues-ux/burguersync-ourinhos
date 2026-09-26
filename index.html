@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BurguerSync Ourinhos | Delivery Artesanal em Tempo Real</title>
+    <meta name="description" content="Hamburgueria artesanal de alta performance com pedidos em tempo real sincronizados via Firebase Firestore e Google Stitch.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍔</text></svg>">
+</head>
+<body>
+
+    <!-- Header Principal com Alternância de Visão -->
+    <header class="main-header">
+        <div class="logo-container">
+            <div class="logo-badge">🍔</div>
+            <h1 class="logo-text">BurguerSync <span>Ourinhos</span></h1>
+        </div>
+
+        <div class="header-right">
+            <!-- Alternância de Visão -->
+            <nav class="view-switch-nav">
+                <button id="btnVisaoCliente" class="btn-switch active">
+                    <span>🛍️</span> <span>Cliente</span>
+                </button>
+                <button id="btnVisaoCozinha" class="btn-switch">
+                    <span>👨‍🍳</span> <span>Cozinha</span>
+                </button>
+            </nav>
+
+            <!-- Botão de Carrinho Flutuante -->
+            <button id="btnCartTrigger" class="btn-cart-trigger">
+                <span>🛒 Carrinho</span>
+                <span id="cartCountBadge" class="cart-count-badge">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Barra de Status e Sincronização em Tempo Real -->
+    <aside class="sync-banner">
+        <div class="sync-status">
+            <span id="statusDot" class="status-dot"></span>
+            <span id="statusText">Inicializando sincronização em nuvem...</span>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 0.75rem;">
+            ⚡ Google Stitch Design • Firebase Firestore Realtime
+        </div>
+    </aside>
+
+    <!-- ======================================================================
+         1. VISÃO DO CLIENTE (Cardápio, Vitrine & Pedido)
+         ====================================================================== -->
+    <main id="visaoCliente" class="view-section">
+        
+        <!-- Hero Banner com Cidade de Ourinhos SP -->
+        <section class="hero-banner">
+            <div class="hero-content">
+                <span class="hero-tag">🔥 O Melhor Smash da Região</span>
+                <h2 class="hero-title">Burguer Artesanal <span>Feito com Paixão</span></h2>
+                <p class="hero-desc">Pães artesanais selados na manteiga, carnes 100% nobres grelhadas no fogo alto e queijos derretidos. Peça agora e acompanhe na cozinha em tempo real!</p>
+                <div class="hero-info-pills">
+                    <span class="info-pill">📍 Ourinhos - SP</span>
+                    <span class="info-pill">⏱️ 30-45 min</span>
+                    <span class="info-pill">🛵 Taxa Fixa R$ 5,00</span>
+                    <span class="info-pill">⭐ 4.9 (1.2k avaliações)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vitrine de Produtos -->
+        <section id="vitrine" class="vitrine-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">🍔 Cardápio Especial</h2>
+                    <p class="section-subtitle">Selecione seus lanches favoritos e personalize os ingredientes</p>
+                </div>
+            </div>
+
+            <!-- Grid de Produtos Renderizado pelo JavaScript -->
+            <div id="listaLanches" class="burgers-grid">
+                <!-- Injetado dinamicamente via app.js -->
+            </div>
+        </section>
+
+        <!-- Overlay do Carrinho Drawer -->
+        <div id="cartOverlay" class="cart-overlay hidden"></div>
+
+        <!-- Drawer Lateral do Carrinho -->
+        <aside id="cartDrawer" class="cart-drawer">
+            <header class="cart-header">
+                <h2><span>🛒</span> Seu Pedido</h2>
+                <button id="btnFecharCarrinho" class="btn-close" title="Fechar carrinho">&times;</button>
+            </header>
+
+            <div class="cart-body">
+                <!-- Lista de itens -->
+                <div id="cartEmptyState" class="cart-empty hidden">
+                    <div class="cart-empty-icon">🍔</div>
+                    <p>Seu carrinho está vazio.</p>
+                    <p style="font-size: 0.8rem; margin-top: 0.4rem;">Escolha um delicioso burger para começar!</p>
+                </div>
+
+                <ul id="listaItensCarrinho" class="cart-items-list">
+                    <!-- Injetado dinamicamente via app.js -->
+                </ul>
+
+                <!-- Resumo Financeiro -->
+                <div class="cart-summary">
+                    <div class="summary-line">
+                        <span>Subtotal:</span>
+                        <span id="subtotalValor">R$ 0,00</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Taxa de Entrega (Ourinhos):</span>
+                        <span id="taxaEntrega">R$ 5,00</span>
+                    </div>
+                    <div class="summary-line total">
+                        <span>Total a Pagar:</span>
+                        <span id="totalValor">R$ 5,00</span>
+                    </div>
+                </div>
+
+                <!-- Formulário de Checkout e Entrega -->
+                <form id="formCheckout" class="checkout-form">
+                    <h3>Dados de Entrega</h3>
+                    <div class="form-group">
+                        <label for="nomeCliente">Nome Completo *</label>
+                        <input type="text" id="nomeCliente" required placeholder="Ex: Lucas Ferreira">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="telefoneCliente">Celular / WhatsApp *</label>
+                        <input type="tel" id="telefoneCliente" required placeholder="(14) 99876-5432">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="enderecoCliente">Endereço Completo (Rua, Nº, Bairro) *</label>
+                        <input type="text" id="enderecoCliente" required placeholder="Ex: Rua Paraná, 450 - Centro">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="obsEntrega">Instruções para o Entregador</label>
+                        <textarea id="obsEntrega" rows="2" placeholder="Ex: Portaria do prédio, tocar interfone 42"></textarea>
+                    </div>
+
+                    <h3>Forma de Pagamento</h3>
+                    <div id="tipoPagamento" class="payment-options">
+                        <label class="payment-radio">
+                            <input type="radio" name="pagamento" value="pix" checked>
+                            <span>⚡ Pix (Chave com Aprovação Instantânea)</span>
+                        </label>
+                        <label class="payment-radio">
+                            <input type="radio" name="pagamento" value="cartao">
+                            <span>💳 Cartão na Entrega (Débito/Crédito)</span>
+                        </label>
+                        <label class="payment-radio">
+                            <input type="radio" name="pagamento" value="dinheiro">
+                            <span>💵 Dinheiro na Entrega</span>
+                        </label>
+                    </div>
+
+                    <div id="campoTroco" class="form-group hidden">
+                        <label for="valorTroco">Precisa de troco para quanto?</label>
+                        <input type="text" id="valorTroco" placeholder="Ex: R$ 50,00 ou R$ 100,00">
+                    </div>
+
+                    <button type="submit" id="btnFinalizarPedido" class="btn-checkout">
+                        <span>🚀</span> Finalizar e Enviar Pedido
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- ======================================================================
+         2. VISÃO DA COZINHA (Painel Kanban Realtime onSnapshot)
+         ====================================================================== -->
+    <main id="visaoCozinha" class="view-section hidden">
+        <div class="kitchen-dashboard">
+            <header class="kitchen-header">
+                <div>
+                    <h2 class="section-title">👨‍🍳 Painel de Produção da Cozinha</h2>
+                    <p class="section-subtitle">Sincronização em tempo real via Firebase Cloud Firestore (NoSQL)</p>
+                </div>
+                <div class="kitchen-stats">
+                    <div class="stat-chip">
+                        <span>Total de Pedidos:</span>
+                        <strong id="totalPedidosHoje">0</strong>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Kanban com 3 colunas de fluxo operacional -->
+            <div class="kitchen-columns">
+                <!-- Coluna 1: Novos Pedidos -->
+                <div class="kitchen-col">
+                    <header class="col-header recebidos">
+                        <h3><span>📥</span> Recebidos</h3>
+                        <span id="countRecebidos" class="col-count">0</span>
+                    </header>
+                    <div id="colRecebidos" class="orders-column-list">
+                        <!-- Pedidos com status 'Recebido' -->
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Em Preparo -->
+                <div class="kitchen-col">
+                    <header class="col-header preparo">
+                        <h3><span>🔥</span> Em Preparo</h3>
+                        <span id="countPreparo" class="col-count">0</span>
+                    </header>
+                    <div id="colPreparo" class="orders-column-list">
+                        <!-- Pedidos com status 'Em Preparo' -->
+                    </div>
+                </div>
+
+                <!-- Coluna 3: Saiu para Entrega / Entregues -->
+                <div class="kitchen-col">
+                    <header class="col-header entrega">
+                        <h3><span>🛵</span> Saiu para Entrega</h3>
+                        <span id="countEntrega" class="col-count">0</span>
+                    </header>
+                    <div id="colEntrega" class="orders-column-list">
+                        <!-- Pedidos com status 'Saiu para Entrega' ou 'Entregue' -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Confirmação & Pagamento Pix -->
+    <div id="modalConfirmacao" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-icon-success">✔</div>
+            <h3 class="modal-title">Pedido Confirmado!</h3>
+            <p class="modal-subtitle">Seu pedido foi enviado para a cozinha com sucesso.</p>
+
+            <div style="background-color: var(--bg-surface); padding: 0.85rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-size: 0.9rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 0.3rem;">
+                    <span>Número do Pedido:</span>
+                    <strong id="modalPedidoId" style="color:var(--primary);">#BS-0000</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom: 0.3rem;">
+                    <span>Valor Total:</span>
+                    <strong id="modalTotal" style="color:var(--accent-yellow);">R$ 0,00</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Pagamento:</span>
+                    <strong id="modalMetodoPagamento">Pix</strong>
+                </div>
+            </div>
+
+            <!-- Área de Pix -->
+            <div id="pixArea" class="modal-pix-box hidden">
+                <h4>⚡ Chave Pix Copia e Cola</h4>
+                <p style="font-size: 0.78rem; color: var(--text-secondary);">Copie o código abaixo e pague no app do seu banco:</p>
+                <div class="pix-copy-area">
+                    <input type="text" id="pixCodeInput" class="pix-input" readonly value="">
+                    <button type="button" id="btnCopiarPix" class="btn-copy-pix">Copiar Código</button>
+                </div>
+            </div>
+
+            <button type="button" id="btnFecharModal" class="btn-modal-close">Acompanhar na Cozinha</button>
+        </div>
+    </div>
+
+    <!-- Rodapé Oficial -->
+    <footer class="main-footer">
+        <p>© 2026 <span class="footer-highlight">BurguerSync Ourinhos</span> • Desenvolvido para Alta Performance e Realtime.</p>
+        <p style="margin-top: 0.3rem; font-size: 0.8rem; color: var(--text-secondary);">SENAI Ourinhos • Escola SENAI "Ary Torres" • Projeto Integrador v2.5.5</p>
+        <div class="badge-antigravity">
+            <span>Powered by</span> <strong>Google Antigravity</strong> • <span>Google Stitch Design</span>
+        </div>
+    </footer>
+
+    <!-- Aplicação Modular ES6 -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
